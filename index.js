@@ -3,6 +3,9 @@ const express = require('express');
 const logger = require('morgan');
 const mongoose = require('mongoose');
 
+const apiRouter = require('./routes/api');
+// const loginRouter = require('./routes/login')
+
 const app = express();
 
 const mongoDB = process.env.MONGO_URL;
@@ -20,6 +23,9 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.use('/api', apiRouter);
+// app.use('/login', loginRouter);
 
 app.use(function (err, req, res, next) {
   console.dir(err);
