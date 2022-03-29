@@ -27,8 +27,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/api', apiRouter);
 // app.use('/login', loginRouter);
 
-app.use(function (err, req, res, next) {
+app.use(function errorHandler(err, req, res, next) {
   console.dir(err);
+  res.status(404).json({ error: err.reason.toString() });
 });
 
 app.listen(3000, function () {
