@@ -102,3 +102,13 @@ exports.update_post = [
     }
   },
 ];
+
+exports.delete_post = async function (req, res, next) {
+  const response = await Post.findByIdAndDelete(req.params.postId).catch(next);
+
+  if (response === null) {
+    res.status(404).json({ response: 'Post not found' });
+  } else if (response) {
+    res.status(200).json({ response: 'Post deleted' });
+  }
+};
