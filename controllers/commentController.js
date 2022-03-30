@@ -84,7 +84,7 @@ exports.edit_comment = [
 
     console.log(response);
 
-    if (!response === null) {
+    if (response === null) {
       return res.status(404).json({ response: 'Post not found.' });
     } else if (response) {
       return res.status(200).json(response.comments.id(req.params.commentId));
@@ -92,3 +92,20 @@ exports.edit_comment = [
   },
 ];
 // Delete comment
+exports.delete_comment = async function (req, res, next) {
+  const response = await Post.findByIdAndUpdate(
+    req.params.postId,
+    {
+      $pull: { comments: { _id: req.params.commentId } },
+    },
+    { new: true }
+  ).catch(next);
+
+  console.log(response);
+
+  if (response === null) {
+    return res.status(404).json({ response: 'Post or comment not found' });
+  } else if (response) {
+    return res.status(200).json(response);
+  }
+};

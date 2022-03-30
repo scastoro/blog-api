@@ -34,5 +34,6 @@ router.post('/posts/:postId/comments', commentController.add_comment);
 router.put('/posts/:postId/comments/:commentId', commentController.edit_comment);
 
 // Delete comment
+router.delete('/posts/:postId/comments/:commentId', commentController.delete_comment);
 
 module.exports = router;

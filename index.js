@@ -1,12 +1,15 @@
 require('dotenv').config();
 const express = require('express');
 const logger = require('morgan');
+const cors = require('cors');
 const mongoose = require('mongoose');
 
 const apiRouter = require('./routes/api');
-// const loginRouter = require('./routes/login')
+// const authRouter = require('./routes/auth')
 
 const app = express();
+
+app.use(cors());
 
 const mongoDB = process.env.MONGO_URL;
 const clientP = mongoose
@@ -25,11 +28,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use('/api', apiRouter);
-// app.use('/login', loginRouter);
+// app.use('/auth', authRouter);
 
 app.use(function errorHandler(err, req, res, next) {
   console.dir(err);
-  console.log(err);
   const errorMsg = err.reason ? err.reason.toString() : { type: err.name, message: err.message };
   res.status(404).json({ error: errorMsg });
 });
