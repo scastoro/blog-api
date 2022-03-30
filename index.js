@@ -29,7 +29,9 @@ app.use('/api', apiRouter);
 
 app.use(function errorHandler(err, req, res, next) {
   console.dir(err);
-  res.status(404).json({ error: err.reason.toString() });
+  console.log(err);
+  const errorMsg = err.reason ? err.reason.toString() : { type: err.name, message: err.message };
+  res.status(404).json({ error: errorMsg });
 });
 
 app.listen(3000, function () {

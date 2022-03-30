@@ -16,19 +16,22 @@ router.get('/posts/:postId', postController.get_post);
 router.get('/posts/:postId/publish', postController.publish_post);
 
 // Update post
-router.post('/posts/:postId/update', postController.update_post);
+router.put('/posts/:postId', postController.update_post);
 
 // Delete post
 router.delete('/posts/:postId', postController.delete_post);
 
 // Get all comments on post
 router.get('/posts/:postId/comments', commentController.get_all_comments);
+
 // Get one comment
+router.get('/posts/:postId/comments/:commentId', commentController.get_comment);
 
 // Add comment
 router.post('/posts/:postId/comments', commentController.add_comment);
 
 // Edit comment
+router.put('/posts/:postId/comments/:commentId', commentController.edit_comment);
 
 // Delete comment
 
