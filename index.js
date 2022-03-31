@@ -34,7 +34,11 @@ app.use('/auth', authRouter);
 app.use(function errorHandler(err, req, res, next) {
   console.dir(err);
   const errorMsg = err.reason ? err.reason.toString() : { type: err.name, message: err.message };
-  res.status(404).json({ error: errorMsg });
+  if (err.status === 401) {
+    res.status(401).json({ type: err.name, message: err.message });
+  } else {
+    res.status(404).json({ error: errorMsg ? errorMsg : err });
+  }
 });
 
 app.listen(3000, function () {

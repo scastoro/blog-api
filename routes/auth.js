@@ -16,12 +16,10 @@ passport.use(
     const response = await bcrypt.compare(password, user.password).catch((err) => done(err));
 
     if (response) {
-      console.log('Logged In!');
       return done(null, user);
     } else {
       return done(null, false, { message: 'Incorrect Password' });
     }
-    // return done(null, user);
   })
 );
 
@@ -29,15 +27,15 @@ const router = express.Router();
 
 router.post(
   '/login',
-  passport.authenticate('local', { session: false, failureMessage: true }),
+  passport.authenticate('local', { session: false, failWithError: true }),
   function (req, res, next) {
     req.login(req.user, { session: false }, (err) => {
       if (err) {
-        res.send(err);
+        res.status(403).json({ response: 'Access denied', error: err });
       }
       console.log(req.user);
       const token = jwt.sign(req.user.toJSON(), process.env.SECRET);
-      return res.json({ user: req.user, token });
+      return res.status(200).json({ response: 'Access granted', user: req.user, token });
     });
   }
 );
@@ -50,8 +48,7 @@ router.post(
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       console.log(errors.array());
-      res.render('signup', { name: req.body.name, errors: errors.array(), title: 'Sign Up' });
-      return;
+      return res.status(404).json({ response: 'Validation Error', errors: errors.Array() });
     }
 
     const hashedPassword = await bcrypt.hash(req.body.password, 10).catch(next);

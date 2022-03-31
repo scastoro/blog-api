@@ -27,6 +27,7 @@ exports.get_comment = async function (req, res, next) {
 };
 
 // Add comment
+// TODO: Refactor to use Post.save() so that the comment can be validated by the Mongo Schema
 exports.add_comment = [
   body('title').trim().escape(),
   body('body', 'Post body is required.').trim().isLength({ min: 1 }).escape(),
