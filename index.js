@@ -1,13 +1,13 @@
-require("dotenv").config();
-const express = require("express");
-const logger = require("morgan");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const jwtStrategy = require("./passport/jwtStrategy");
+require('dotenv').config();
+const express = require('express');
+const logger = require('morgan');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const jwtStrategy = require('./passport/jwtStrategy');
 
-const apiRouter = require("./routes/api");
-const passport = require("passport");
-const authRouter = require("./routes/auth");
+const apiRouter = require('./routes/api');
+const passport = require('passport');
+const authRouter = require('./routes/auth');
 
 const app = express();
 
@@ -19,35 +19,34 @@ const clientP = mongoose
   .connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((m) => m.connection.getClient());
 const db = mongoose.connection;
-db.on("error", console.error.bind(console, "MongoDB connection error:"));
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-passport.use("MyJwtStrategy", jwtStrategy);
+passport.use('MyJwtStrategy', jwtStrategy);
 
-app.use(logger("dev"));
+app.use(logger('dev'));
 app.use(express.json());
 app.use(passport.initialize());
 app.use(express.urlencoded({ extended: false }));
 
-app.use(function (req, res, next) {
-  console.log(req.body);
-  next();
-});
-
 app.use(
-  "/api",
-  passport.authenticate("MyJwtStrategy", {
+  '/api',
+  passport.authenticate('MyJwtStrategy', {
     session: false,
     failWithError: true,
   }),
   apiRouter
 );
-app.use("/auth", authRouter);
+app.use('/auth', authRouter);
+
+app.use(function (req, res, next) {
+  console.log(req.body);
+  console.log(req.user);
+  next();
+});
 
 app.use(function errorHandler(err, req, res, next) {
   console.dir(err);
-  const errorMsg = err.reason
-    ? err.reason.toString()
-    : { type: err.name, message: err.message };
+  const errorMsg = err.reason ? err.reason.toString() : { type: err.name, message: err.message };
   if (err.status === 401) {
     res.status(401).json({ status: 401, type: err.name, message: err.message });
   } else {

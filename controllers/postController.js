@@ -1,11 +1,11 @@
-const express = require("express");
-const User = require("../models/user");
-const Post = require("../models/post");
-const { body, validationResult } = require("express-validator");
+const express = require('express');
+const User = require('../models/user');
+const Post = require('../models/post');
+const { body, validationResult } = require('express-validator');
 
 exports.all_posts = async function (req, res, next) {
   const response = await Post.find({})
-    .populate({ path: "author", select: "username -_id" })
+    .populate({ path: 'author', select: 'username -_id' })
     .catch(next);
   console.log(response);
   res.json(response);
@@ -13,8 +13,8 @@ exports.all_posts = async function (req, res, next) {
 
 // TODO: figure out how to get author id (from params or from hidden field on form)
 exports.add_post = [
-  body("title", "Blog title is required").trim().isLength({ min: 1 }).escape(),
-  body("body", "Blog body is required.").trim().isLength({ min: 1 }).escape(),
+  body('title', 'Blog title is required').trim().isLength({ min: 1 }).escape(),
+  body('body', 'Blog body is required.').trim().isLength({ min: 1 }).escape(),
   async function (req, res, next) {
     const errors = validationResult(req);
 
@@ -22,30 +22,34 @@ exports.add_post = [
     const errorMsgs = errors.array().map((error) => error.msg);
     console.log(errors);
     if (!errors.isEmpty()) {
-      res
-        .status(422)
-        .json({ error: `Invalid request format.`, messages: errorMsgs });
+      res.status(422).json({ error: `Invalid request format.`, messages: errorMsgs });
       return;
     }
 
     const post = new Post({
       title: req.body.title,
-      body: req.body.title,
-      author: req.body.authorId,
+      body: req.body.body,
+      author: req.user._id,
     });
 
+    // Save new post to posts collection
     const response = await post.save().catch((err) => {
       res.status(404).json(err);
       next(err);
     });
-    console.log(response);
+    console.log(`Response: ${response}`);
 
-    const userResponse = await User.findByIdAndUpdate(req.body.authorId, {
-      $push: { posts: response._id },
-    }).catch(next);
-    console.log(userResponse);
+    // Add post to Author's posts array
+    const userResponse = response
+      ? await User.findByIdAndUpdate(req.user._id, {
+          $push: { posts: response._id },
+        }).catch(next)
+      : null;
+    console.log(`User Response: ${userResponse}`);
 
-    res.status(200).json({ response: "Post Created", post: response });
+    if (userResponse) {
+      res.status(200).json({ response: 'Post Created', post: response });
+    }
   },
 ];
 
@@ -55,7 +59,7 @@ exports.get_post = async function (req, res, next) {
   console.log(postResponse);
 
   if (postResponse === null) {
-    res.status(404).json({ response: "Post not found" });
+    res.status(404).json({ response: 'Post not found' });
   } else if (postResponse) {
     res.status(200).json(postResponse);
   }
@@ -65,20 +69,20 @@ exports.get_post = async function (req, res, next) {
 exports.publish_post = async function (req, res, next) {
   const post = await Post.findById(req.params.postId).catch(next);
   if (!post) {
-    res.status(404).json({ response: "Post not found" });
+    res.status(404).json({ response: 'Post not found' });
     return;
   }
   post.published = !post.published;
   const response = await post.save().catch(next);
   console.log(response);
   if (response) {
-    res.status(200).json({ response: "Post updated", post: response });
+    res.status(200).json({ response: 'Post updated', post: response });
   }
 };
 
 exports.update_post = [
-  body("title", "Blog title is required").trim().isLength({ min: 1 }).escape(),
-  body("body", "Blog body is required.").trim().isLength({ min: 1 }).escape(),
+  body('title', 'Blog title is required').trim().isLength({ min: 1 }).escape(),
+  body('body', 'Blog body is required.').trim().isLength({ min: 1 }).escape(),
   async function (req, res, next) {
     const errors = validationResult(req);
 
@@ -86,9 +90,7 @@ exports.update_post = [
     const errorMsgs = errors.array().map((error) => error.msg);
     console.log(errors);
     if (!errors.isEmpty()) {
-      res
-        .status(422)
-        .json({ error: `Invalid request format.`, messages: errorMsgs });
+      res.status(422).json({ error: 'Invalid request format.', messages: errorMsgs });
       return;
     }
 
@@ -106,9 +108,9 @@ exports.update_post = [
     console.log(response);
 
     if (response === null) {
-      res.status(404).json({ response: "Post not found" });
+      res.status(404).json({ response: 'Post not found' });
     } else if (response) {
-      res.status(200).json({ response: "Post Updated", post: response });
+      res.status(200).json({ response: 'Post Updated', post: response });
     }
   },
 ];
@@ -117,8 +119,8 @@ exports.delete_post = async function (req, res, next) {
   const response = await Post.findByIdAndDelete(req.params.postId).catch(next);
 
   if (response === null) {
-    res.status(404).json({ response: "Post not found" });
+    res.status(404).json({ response: 'Post not found' });
   } else if (response) {
-    res.status(200).json({ response: "Post deleted" });
+    res.status(200).json({ response: 'Post deleted' });
   }
 };
