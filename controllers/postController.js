@@ -75,8 +75,10 @@ exports.publish_post = async function (req, res, next) {
   post.published = !post.published;
   const response = await post.save().catch(next);
   console.log(response);
-  if (response) {
-    res.status(200).json({ response: 'Post updated', post: response });
+  if (response.published) {
+    res.status(200).json({ response: 'Post published', post: response });
+  } else {
+    res.status(200).json({ response: 'Post unpublished', post: response });
   }
 };
 
@@ -99,6 +101,7 @@ exports.update_post = [
       {
         title: req.body.title,
         body: req.body.body,
+        timeStamp: req.body.timeStamp,
       },
       { new: true }
     ).catch((err) => {
